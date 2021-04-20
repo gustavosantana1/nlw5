@@ -1,4 +1,4 @@
-
+<h1 align="center">PlantManager</h1>
 
 <p align="center">
   <a href="#technologies">Technologies</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
