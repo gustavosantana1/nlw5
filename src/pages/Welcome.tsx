@@ -36,7 +36,7 @@ export function Welcome (){
                     />
                 
                 <Text style={style.subtitle}>
-                    Não esqueça mais de regar suas plantas. Nóis cuidamos de lembrar sempre que precisar
+                    Não esqueça mais de regar suas plantas. Nós cuidamos de lembrar sempre que precisar
                 </Text>
                 <TouchableOpacity 
                     style={style.button} 
