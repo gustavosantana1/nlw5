@@ -1,144 +1,120 @@
-import React, { useState } from 'react';
+import { useNavigation, useRoute } from "@react-navigation/core";
+import React, { useState } from "react";
 import {
-    Alert,
-    StyleSheet,
-    Text,
-    View,
-    Image,
-    ScrollView,
-    Platform,
-    TouchableOpacity,
+  Alert,
+  Image,
+  Platform,
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+} from "react-native";
+import { getBottomSpace } from "react-native-iphone-x-helper";
+import { SvgFromUri } from "react-native-svg";
+import DateTimePicker, { Event } from "@react-native-community/datetimepicker";
 
-} from 'react-native';
-import { getBottomSpace } from 'react-native-iphone-x-helper';
-import {SvgFromUri} from 'react-native-svg';
-import waterdrop from '../assets/waterdrop.png';
-import { Button } from '../components/Button';
-import colors from '../styles/colors';
-import fonts from '../styles/fonts';
-import {useNavigation, useRoute} from '@react-navigation/core';
-import DateTimePicker, {Event} from '@react-native-community/datetimepicker';
-import { format, isBefore } from 'date-fns';
-import {PlantProps, savePlant } from '../libs/storage';
+import waterdrop from "../assets/waterdrop.png";
+import { Button } from "../components/Button";
+import colors from "../styles/colors";
+import fonts from "../styles/fonts";
+import { format, isBefore } from "date-fns";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import { PlantProps, savePlant } from "../libs/storage";
 
-interface Params{
-    plant: PlantProps;
+interface Params {
+  plant: PlantProps;
 }
 
-export function PlantSave(){
+export function PlantSave() {
+  const [selectedDateTime, setSelectedDateTime] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(Platform.OS === "ios");
 
-    const [selectedDateTime, setSelectedDateTime] = useState( new Date());
-    const [showDatePicker, setShowDatePicker] = useState(Platform.OS == 'ios');
-    const route = useRoute();
-    const { plant } = route.params as Params;
-    const navigation = useNavigation();
+  const route = useRoute();
+  const { plant } = route.params as Params;
 
-    function handleChangeTime(event: Event, dateTime: Date | undefined){
-        
-        if(Platform.OS == 'android'){
-            setShowDatePicker((oldState)=>!oldState);
-        }
+  const navigation = useNavigation();
 
-        //isBefore para validar a data
-        if(dateTime && isBefore(dateTime, new Date())){
-            setSelectedDateTime(new Date());
-            return Alert.alert('Escolha uma hora no futuro! ⏲');
-        }
-
-        if(dateTime)
-            setSelectedDateTime(dateTime);
+  function handleChangeTime(event: Event, dateTime: Date | undefined) {
+    if (Platform.OS === "android") {
+      setShowDatePicker((oldState) => !oldState);
     }
 
-    function handleOpenDateTimePickerForAndroid(){
-        setShowDatePicker(oldState => !oldState);   
+    if (dateTime && isBefore(dateTime, new Date())) {
+      setSelectedDateTime(new Date());
+      return Alert.alert("Escolha uma hora no futuro! ⏰");
     }
 
-    async function handleSave(){
-       
-        try {
-            await savePlant({
-                ...plant,
-                dateTimeNotification: selectedDateTime
-            });
+    if (dateTime) setSelectedDateTime(dateTime);
+  }
 
-            navigation.navigate('Confirmation', {
-                title:'Tudo Certo',
-                subtitle:'Fique tranquilo que sempre vamos lembrar você de cuidar da sua plantinha com muito cuidado',
-                buttonTitle:'Muito obrigado :D',
-                icon: 'hug',
-                nextScreen: 'MyPlants'
-            });
-        } catch {
-            Alert.alert('Não foi possível salvar. 😥');
-        }
+  function handleOpenDatetimePickerForAndroid() {
+    setShowDatePicker((oldState) => !oldState);
+  }
+
+  async function handleSave() {
+    try {
+      await savePlant({
+        ...plant,
+        dateTimeNotification: selectedDateTime,
+      });
+
+      navigation.navigate("Confirmation", {
+        title: "Tudo certo",
+        subtitle: `Fique tranquilo que sempre vamos lembrar você de cuidar da sua plantinha com muito cuidado.`,
+        buttonTitle: "Muito obrigado",
+        icon: "hug",
+        nextScreen: "MyPlants",
+      });
+    } catch {
+      Alert.alert("Não foi possível salvar. 😢");
     }
+  }
 
-    return(
-        <View style={style.container}>
-            <View style={style.plantInfo}>
-                <SvgFromUri
-                    uri={plant.photo}
-                    height={150}
-                    width={150}
-                />
-                <Text style={style.plantName}>
-                   {plant.name}
-                </Text>
-                <Text style={style.plantAbout}>
-                    {plant.about}
-                </Text>
-            </View>
-            <View style={style.controller}>
+  return (
+    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={style.scrollListContainer}>
+      <View style={style.container}>
+        <View style={style.plantInfo}>
+          <SvgFromUri uri={plant.photo} height={150} width={150} />
 
-                <View style={style.tipContainer}>
-                    <Image
-                        source={waterdrop}
-                        style={style.tipImage}
-                    />
-                    <Text style={style.tipText}>
-                        {plant.water_tips}
-                    </Text>
-                </View>
-                
-                <Text style={style.alertLabel}>
-                    escolha o melhor horário para ser lembrado.
-                </Text>
-
-               { 
-               showDatePicker && (
-               <DateTimePicker
-                    value={selectedDateTime}
-                    mode="time"
-                    display="spinner"
-                    onChange={handleChangeTime}
-                />
-                )}
-                {
-                    Platform.OS == 'android' && (
-                        <TouchableOpacity
-                            onPress={handleOpenDateTimePickerForAndroid}
-                            style={style.dateTimePickerButton}
-                        >
-                            <Text style={style.dataTimePickerText}>
-
-                                {`Mudar ${format(selectedDateTime, 'HH:mm')}`}
-
-                            </Text>
-                        </TouchableOpacity>
-                        
-                    )
-                }
-                
-                <Button 
-                    title="Cadastrar Planta"
-                    onPress={handleSave}
-                />
-
-            </View>
-
+          <Text style={style.plantName}>{plant.name}</Text>
+          <Text style={style.plantAbout}>{plant.about}</Text>
         </View>
 
-    )
+        <View style={style.controller}>
+          <View style={style.tipContainer}>
+            <Image source={waterdrop} style={style.tipImage} />
+            <Text style={style.tipText}>{plant.water_tips}</Text>
+          </View>
+
+          <Text style={style.alertLabel}>
+            Escolha o melhor horário para ser lembrado:
+          </Text>
+
+          {showDatePicker && (
+            <DateTimePicker
+              value={selectedDateTime}
+              mode="time"
+              display="spinner"
+              onChange={handleChangeTime}
+            />
+          )}
+
+          {Platform.OS === "android" && (
+            <TouchableOpacity
+              style={style.dateTimePickerButton}
+              onPress={handleOpenDatetimePickerForAndroid}
+            >
+              <Text style={style.dataTimePickerText}>
+                {`Mudar ${format(selectedDateTime, "HH:mm")}`}
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          <Button title="Cadastrar planta" onPress={handleSave} />
+        </View>
+      </View>
+    </ScrollView>
+  );
 }
 
 const style = StyleSheet.create({
@@ -213,6 +189,11 @@ const style = StyleSheet.create({
         color: colors.heading,
         fontSize: 24,
         fontFamily: fonts.text
+    },
+    scrollListContainer: {
+      flexGrow: 1,
+      justifyContent: 'space-between',
+      backgroundColor: colors.shape
     },
     
 

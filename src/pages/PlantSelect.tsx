@@ -75,7 +75,7 @@ export function PlantSelect(){
         fetchPlants();
     }
 
-    function handlePlantSelect(plant:PlantsProps){
+    function handlePlantSelect(plant:PlantProps){
         navigation.navigate('PlantSave', { plant });
     }
     
@@ -97,10 +97,7 @@ export function PlantSelect(){
     },[]);
 
     useEffect(()=>{
-
-       
         fetchPlants();
-       
     },[]);
 
     if(loading)
@@ -167,9 +164,6 @@ const style = StyleSheet.create({
     container:{
         flex:1,
         backgroundColor: colors.background
-       /*  justifyContent: 'center',
-        alignItems:'center',
-        backgroundColor: colors.background */
     },
     header:{
         paddingHorizontal:30
